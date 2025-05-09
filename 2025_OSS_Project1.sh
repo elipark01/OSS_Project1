@@ -15,8 +15,8 @@ fi
 
 # Header
 echo "************OSS1 - Project1************"
-echo "* StudentID : 12345678 *"
-echo "* Name : Gildong Hong *"
+echo "* StudentID : 12201738 *"
+echo "* Name : Joonha Park *"
 echo "***************************************"
 
 while true; do
