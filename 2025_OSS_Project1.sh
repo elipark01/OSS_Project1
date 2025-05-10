@@ -63,30 +63,34 @@ while true; do
             echo "Canceled."
         fi
         ;;
+3)
+    echo -n "Enter team abbreviation (e.g., NYY, LAD, BOS): "
+    read team
 
-    3)
-        echo -n "Enter team abbreviation (e.g., NYY, LAD, BOS): "
-        read team
-        result=$(awk -F, -v team="$team" '
-            BEGIN {count = 0; sum_age = 0; sum_hr = 0; sum_rbi = 0}
-            NR > 1 && $4 == team {
-                sum_age += $3
-                sum_hr += $15
-                sum_rbi += $16
-                count++
+    result=$(awk -F, -v team="$team" '
+        BEGIN {count = 0; sum_age = 0; sum_hr = 0; sum_rbi = 0}
+        NR > 1 && $4 == team {  # 첫 번째 줄을 제외하고 팀이 일치하는 경우
+            sum_age += $3      # 나이 (필드 3)
+            sum_hr += $14      # 홈런 (필드 14)
+            sum_rbi += $15     # RBI (필드 15)
+            count++            # 팀에 속한 선수 수 증가
+        }
+        END {
+            if (count == 0)  # 팀이 없는 경우 에러 메시지 출력
+                print "Error: Team \"" team "\" not found."
+            else {  # 팀이 있는 경우 결과 출력
+                printf "Team stats for %s:\n", team
+                printf "Average age: %.1f\n", sum_age / count
+                printf "Total home runs: %d\n", sum_hr
+                printf "Total RBI: %d\n", sum_rbi
             }
-            END {
-                if (count == 0)
-                    print "Error: Team \"" team "\" not found."
-                else {
-                    printf "Team stats for %s:\n", team
-                    printf "Average age: %.1f\n", sum_age / count
-                    printf "Total home runs: %d\n", sum_hr
-                    printf "Total RBI: %d\n", sum_rbi
-                }
-            }' "$CSV_FILE")
-        echo "$result"
-        ;;
+        }' "$CSV_FILE")
+
+    # 결과 출력
+    echo "$result"
+    ;;
+
+
 
     4)
     echo "Compare players by age groups:"
@@ -144,28 +148,29 @@ while true; do
 
 
     6)
-        echo "Generate a formatted player report for which team?"
-        echo -n "Enter team abbreviation (e.g., NYY, LAD, BOS): "
-        read team
+    echo "Generate a formatted player report for which team?"
+    echo -n "Enter team abbreviation (e.g., NYY, LAD, BOS): "
+    read team
 
-        count=$(awk -F, -v team="$team" 'NR > 1 && $4 == team {print $0}' "$CSV_FILE" | wc -l)
+    count=$(awk -F, -v team="$team" 'NR > 1 && $4 == team {print $0}' "$CSV_FILE" | wc -l)
 
-        if [ "$count" -eq 0 ]; then
-            echo "Error: Team \"$team\" not found."
-        else
-            echo "================== $team PLAYER REPORT =================="
-            echo -n "Date: "
-            date +%Y/%m/%d
-            echo "-------------------------------------------------------"
-            echo "PLAYER                     HR   RBI   AVG   OBP   OPS"
-            echo "-------------------------------------------------------"
-            awk -F, -v team="$team" 'NR > 1 && $4 == team {
-                printf "%-25s %3d  %4d  %.3f  %.3f  %.3f\n", $2, $15, $16, $20, $21, $23
-            }' "$CSV_FILE" | sort -k2 -nr
-            echo "--------------------------------------"
-            echo "TEAM TOTALS: $count players"
-        fi
-        ;;
+    if [ "$count" -eq 0 ]; then
+        echo "Error: Team \"$team\" not found."
+    else
+        echo "================== $team PLAYER REPORT =================="
+        echo -n "Date: "
+        date +%Y/%m/%d
+        echo "-------------------------------------------------------"
+        echo "PLAYER                     HR   RBI   AVG   OBP   OPS"
+        echo "-------------------------------------------------------"
+        awk -F, -v team="$team" 'NR > 1 && $4 == team {
+            printf "%-25s %3d  %4d  %.3f  %.3f  %.3f\n", $2, $14, $15, $20, $21, $23
+        }' "$CSV_FILE" | sort -k2 -nr
+        echo "--------------------------------------"
+        echo "TEAM TOTALS: $count players"
+    fi
+    ;;
+
 
     7)
         echo "Have a good day!"
