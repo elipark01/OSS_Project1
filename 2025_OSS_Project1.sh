@@ -32,11 +32,12 @@ while true; do
     read command
 
     case $command in
-    1)
+
+            1)
         echo -n "Enter a player name to search: "
         read name
-        result=$(awk -F, -v name="$name" 'BEGIN{IGNORECASE=1}
-            NR > 1 && tolower($2) ~ tolower(name) {
+        result=$(awk -F, -v name="$name" '
+            NR > 1 && $2 == name {
                 printf "Player stats for \"%s\":\n", name;
                 printf "Player: %s, Team: %s, Age: %s, WAR: %s, HR: %s, BA: %s\n", $2, $4, $3, $6, $15, $20;
                 found = 1
@@ -46,6 +47,7 @@ while true; do
             }' "$CSV_FILE")
         echo "$result"
         ;;
+
 
     2)
         echo -n "Do you want to see the top 5 players by SLG? (y/n) : "
@@ -87,14 +89,14 @@ while true; do
         ;;
 
     4)
-        echo "Compare players by age groups:"
-        echo "1. Group A (Age < 25)"
-        echo "2. Group B (Age 25-30)"
-        echo "3. Group C (Age > 30)"
-        echo -n "Select age group (1-3): "
-        read group
+    echo "Compare players by age groups:"
+    echo "1. Group A (Age < 25)"
+    echo "2. Group B (Age 25-30)"
+    echo "3. Group C (Age > 30)"
+    echo -n "Select age group (1-3): "
+    read group
 
-        case "$group" in
+    case "$group" in
         1)
             condition='($3 < 25 && $8 >= 502)'
             label="Group A (Age < 25)"
@@ -111,18 +113,17 @@ while true; do
             echo "Invalid selection."
             continue
             ;;
-        esac
+    esac
 
-        echo "Top 5 by SLG in $label:"
-        awk -F, -v cond="$condition" '
-            NR > 1 {
-                if ('$condition') {
-                    print $2 "," $4 "," $3 "," $21 "," $20 "," $15
-                }
-            }' "$CSV_FILE" | sort -t, -k4 -nr | head -n 5 | awk -F, '{
-            printf "%s (%s) - Age: %s, SLG: %s, BA: %s, HR: %s\n", $1, $2, $3, $4, $5, $6
-        }'
-        ;;
+    echo "Top 5 by SLG in $label:"
+    awk -F, 'NR > 1 && '"$condition"' {
+        # 출력: Player, Team, Age, SLG, BA, HR
+        print $2 "," $4 "," $3 "," $22 "," $20 "," $14
+    }' "$CSV_FILE" | sort -t, -k4 -nr | head -n 5 | awk -F, '{
+        printf "%s (%s) - Age: %s, SLG: %s, BA: %s, HR: %s\n", $1, $2, $3, $4, $5, $6
+    }'
+    ;;
+
 
     5)
         echo "Find players with specific criteria"
