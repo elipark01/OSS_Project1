@@ -55,7 +55,7 @@ while true; do
         if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
             echo "***Top 5 Players by SLG***"
             awk -F, 'NR > 1 && $8 >= 502 { 
-                printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $6, $15, $16, $21
+                printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $6, $15, $16, $22
             }' "$CSV_FILE" | sort -t, -k6 -nr | head -n 5 | awk -F, '{
                 printf "%d. %s (Team: %s) - SLG: %s, HR: %s, RBI: %s\n", NR, $1, $2, $6, $4, $5
             }'
@@ -125,21 +125,23 @@ while true; do
     ;;
 
 
-    5)
-        echo "Find players with specific criteria"
-        echo -n "Minimum home runs: "
-        read min_hr
-        echo -n "Minimum batting average (e.g., 0.280): "
-        read min_ba
+   5)
+    echo "Find players with specific criteria"
+    echo -n "Minimum home runs: "
+    read min_hr
+    echo -n "Minimum batting average (e.g., 0.280): "
+    read min_ba
 
-        echo "Players with HR ≥ $min_hr and BA ≥ $min_ba:"
-        awk -F, -v hr="$min_hr" -v ba="$min_ba" '
-            NR > 1 && $8 >= 502 && $15 >= hr && $20 >= ba {
-                printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $15, $20, $16, $21
+    echo "Players with HR ≥ $min_hr and BA ≥ $min_ba:"
+    awk -F, -v hr="$min_hr" -v ba="$min_ba" '
+        NR > 1 && $8 >= 502 && $14 >= hr && $20 >= ba {
+            # 출력: Player, Team, HR, BA, RBI, SLG
+            printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $14, $20, $16, $21
         }' "$CSV_FILE" | sort -t, -k3 -nr | awk -F, '{
             printf "%s (%s) - HR: %s, BA: %s, RBI: %s, SLG: %s\n", $1, $2, $3, $4, $5, $6
         }'
-        ;;
+    ;;
+
 
     6)
         echo "Generate a formatted player report for which team?"
