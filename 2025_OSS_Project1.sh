@@ -39,7 +39,7 @@ while true; do
         result=$(awk -F, -v name="$name" '
             NR > 1 && $2 == name {
                 printf "Player stats for \"%s\":\n", name;
-                printf "Player: %s, Team: %s, Age: %s, WAR: %s, HR: %s, BA: %s\n", $2, $4, $3, $6, $15, $20;
+                printf "Player: %s, Team: %s, Age: %s, WAR: %s, HR: %s, BA: %s\n", $2, $4, $3, $6, $14, $20;
                 found = 1
             }
             END {
@@ -55,7 +55,7 @@ while true; do
         if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
             echo "***Top 5 Players by SLG***"
             awk -F, 'NR > 1 && $8 >= 502 { 
-                printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $6, $15, $16, $22
+                printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $6, $14, $15, $22
             }' "$CSV_FILE" | sort -t, -k6 -nr | head -n 5 | awk -F, '{
                 printf "%d. %s (Team: %s) - SLG: %s, HR: %s, RBI: %s\n", NR, $1, $2, $6, $4, $5
             }'
@@ -140,7 +140,7 @@ while true; do
     awk -F, -v hr="$min_hr" -v ba="$min_ba" '
         NR > 1 && $8 >= 502 && $14 >= hr && $20 >= ba {
             # 출력: Player, Team, HR, BA, RBI, SLG
-            printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $14, $20, $16, $21
+            printf "%s,%s,%s,%s,%s,%s\n", $2, $4, $14, $20, $15, $22
         }' "$CSV_FILE" | sort -t, -k3 -nr | awk -F, '{
             printf "%s (%s) - HR: %s, BA: %s, RBI: %s, SLG: %s\n", $1, $2, $3, $4, $5, $6
         }'
